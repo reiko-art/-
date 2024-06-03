@@ -1,0 +1,68 @@
+#coding: utf-8
+import os
+import shutil
+import numpy as np
+from PIL import Image
+from skimage import data
+from sklearn.cluster import KMeans
+
+
+if __name__ ==  "__main__":
+
+    # 変数名
+    origin_path = 'C:/Users/Zeon/Desktop/test/'
+    convert_path = 'C:/Users/Zeon/Desktop/img_convert/'
+    group_path =  'C:/Users/Zeon/Desktop/img_group/'
+
+    # 画像サイズ
+    h = 100
+    w = 125
+
+    # クラスタ数
+    n_cluster =5
+
+
+
+    # 画像サイズを揃えて保存
+    for f in os.listdir(origin_path):
+        print(f)
+        img = Image.open(origin_path+f)
+        img=img.convert('RGB')
+        img_resize = img.resize((w,h))
+        
+         # もしディレクトリがなければ、そのディレクトリを作成
+        if os.path.exists(convert_path) == False:
+            os.mkdir(convert_path)
+
+        img_resize.save(convert_path+f)
+
+
+       
+    # 3次元の画像データを2次元データに変換する
+    feature = np.array([data.imread(convert_path + f)for f in os.listdir(convert_path)])
+    feature = feature.reshape(len(feature), -1).astype(np.float64)
+
+    # 学習
+    model = KMeans(n_clusters=n_cluster).fit(feature)
+
+    # ラベリングの結果
+    labels = model.labels_
+    print(labels)
+
+    # 分類結果ごと、画像をディレクトリにコピー
+    for label, path in zip(labels, os.listdir(convert_path)):
+
+        if os.path.exists(group_path) == False:
+            os.mkdir(group_path)
+
+        copy_path = group_path+str(label)
+
+        if os.path.exists(copy_path) == False:
+            os.mkdir(copy_path)
+
+        shutil.copyfile(origin_path+path, copy_path+"/"+path)
+        print(label, path)
+labels
+a = np.array(labels)
+np.savetxt('test5.txt', a,fmt='%d')
+feature
